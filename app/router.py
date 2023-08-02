@@ -88,7 +88,19 @@ def bulk_upsert_data_to_db(file_type, db, df):
 def get_employee_quarters(db: Session = Depends(get_db)):
     try:
         
-        results = db.query(
+        results = get_results_sql_employees_per_quarter(db)
+        
+        db.close()
+
+        table_html = generate_table_html_employees_per_quarter(results)
+
+        return table_html
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def get_results_sql_employees_per_quarter(db):
+    return db.query(
             Departments.department,
             Jobs.job,
             func.sum(
@@ -126,10 +138,9 @@ def get_employee_quarters(db: Session = Depends(get_db)):
             ).order_by(
                 Departments.department, Jobs.job
             ).all()
-        
-        db.close()
 
-        result_list = [
+def generate_table_html_employees_per_quarter(results):
+    result_list = [
         {
                 'job': job_title,
                 'department': department,
@@ -142,17 +153,13 @@ def get_employee_quarters(db: Session = Depends(get_db)):
         ]
 
         # Generate the HTML table
-        table_html = "<table border='1'>\n<tr><th>Department</th><th>Job</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr>\n"
+    table_html = "<table border='1'>\n<tr><th>Department</th><th>Job</th><th>Q1</th><th>Q2</th><th>Q3</th><th>Q4</th></tr>\n"
 
-        for row in result_list:
-            table_html += f"<tr><td>{row['job']}</td><td>{row['department']}</td><td>{row['Q1']}</td><td>{row['Q2']}</td><td>{row['Q3']}</td><td>{row['Q4']}</td></tr>\n"
+    for row in result_list:
+        table_html += f"<tr><td>{row['job']}</td><td>{row['department']}</td><td>{row['Q1']}</td><td>{row['Q2']}</td><td>{row['Q3']}</td><td>{row['Q4']}</td></tr>\n"
 
-        table_html += "</table>"
-
-        return table_html
-
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    table_html += "</table>"
+    return table_html
    
 @router.get("/departmentsHiringMoreThanAvg", response_class=HTMLResponse)
 def get_hiring_more_than_avg( db: Session = Depends(get_db)):
