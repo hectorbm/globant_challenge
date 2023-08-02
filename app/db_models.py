@@ -14,7 +14,14 @@ class Employees(Base):
     department_id = Column(Integer, ForeignKey("departments.id"), nullable=True)
     job_id = Column(Integer, ForeignKey("jobs.id"), nullable=True)
 
-    def create_employees(cls, employees, db: Session):
+    def create_employees(cls, employees: list, db: Session):
+        """
+        Create or update employees records in the database .
+        This function performs an "upsert" operation (insert or update) based on the employees's primary key.
+        Parameters:
+            employees (list): A list of dictionaries representing employees to be inserted or updated.
+            db (Session): The database session.
+        """
         try:
             stmt = insert(Employees).values(employees)
             on_conflict_stmt = stmt.on_conflict_do_update(
@@ -30,7 +37,6 @@ class Employees(Base):
             db.commit()
 
         except SQLAlchemyError as e:
-            # Log the error or handle it appropriately
             db.rollback()
 
 class Jobs(Base):
@@ -39,7 +45,14 @@ class Jobs(Base):
     id = Column(Integer, primary_key=True)
     job = Column(String)
 
-    def create_jobs(cls, jobs, db: Session):
+    def create_jobs(cls, jobs: list, db: Session):
+        """
+        Create or update jobs records in the database .
+        This function performs an "upsert" operation (insert or update) based on the job's primary key.
+        Parameters:
+            jobs (list): A list of dictionaries representing jobs to be inserted or updated.
+            db (Session): The database session.
+        """
         try:
             stmt = insert(Jobs).values(jobs)
             on_conflict_stmt = stmt.on_conflict_do_update(
@@ -52,7 +65,6 @@ class Jobs(Base):
             db.commit()
 
         except SQLAlchemyError as e:
-            # Log the error or handle it appropriately
             db.rollback()
 
 class Departments(Base):
@@ -61,8 +73,14 @@ class Departments(Base):
     id = Column(Integer, primary_key=True)
     department = Column(String)
 
-    def create_departments(cls, departments, db: Session):
-        print(departments)
+    def create_departments(cls, departments: list, db: Session):
+        """
+        Create or update department records in the database .
+        This function performs an "upsert" operation (insert or update) based on the department's primary key.
+        Parameters:
+            departments (list): A list of dictionaries representing departments to be inserted or updated.
+            db (Session): The database session.
+        """
         try:
             stmt = insert(Departments).values(departments)
             on_conflict_stmt = stmt.on_conflict_do_update(
@@ -75,5 +93,4 @@ class Departments(Base):
             db.commit()
 
         except SQLAlchemyError as e:
-            # Log the error or handle it appropriately
             db.rollback()
