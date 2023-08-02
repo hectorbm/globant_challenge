@@ -84,7 +84,7 @@ def bulk_upsert_data_to_db(file_type, db, df):
     else:
         Departments.create_departments(Departments, departments, db)
 
-@router.get("/employee_quarters/", response_class=HTMLResponse)
+@router.get("/employeePerQuarters", response_class=HTMLResponse)
 def get_employee_quarters(db: Session = Depends(get_db)):
     try:
         
