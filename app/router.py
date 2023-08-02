@@ -22,6 +22,17 @@ def read_root():
 
 @router.post("/uploadDocument/{file_type}")
 def upload_document(file_type: str, file: UploadFile = File(...), db: Session = Depends(get_db)):
+    """
+    Uploads a .csv document of the specified file_type to the database.
+
+    Parameters:
+        file_type (str): Type of the file being uploaded.
+        file (UploadFile): The .csv file to be uploaded (form-data, file param).
+        db (Session): The database session.
+
+    Returns:
+        dict: A dictionary with a validation status or success message.
+    """
     # Validate the file provided is a .csv file
     validate_is_csv_file(file)
 
@@ -53,6 +64,12 @@ def upload_document(file_type: str, file: UploadFile = File(...), db: Session = 
 
 @router.get("/employeePerQuarters", response_class=HTMLResponse)
 def get_employee_quarters(db: Session = Depends(get_db)):
+    """
+    Retrieves the hired employees in 2021 splitted into quarters and presents it as an HTML table.
+
+    Parameters:
+        db (Session): The database session.
+    """
     try:
         
         results = get_results_sql_employees_per_quarter(db)
@@ -68,6 +85,12 @@ def get_employee_quarters(db: Session = Depends(get_db)):
 
 @router.get("/departmentsHiringMoreThanAvg", response_class=HTMLResponse)
 def get_hiring_more_than_avg( db: Session = Depends(get_db)):
+    """
+    Retrieves departments with hiring counts higher than the average the departments hired in 2021 and presents the results as an HTML table.
+
+    Parameters:
+        db (Session): The database session.
+    """
     subquery = get_subquery_avg_hiring_per_department_only2021(db)
 
     # Get the average of all departments 2021
