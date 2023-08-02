@@ -169,6 +169,13 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
 
     avg_value = db.query(func.avg(subquery.c.hiring_count)).all()[0][0]
 
+
+    if avg_value is None:
+        raise HTTPException(
+            400,
+            detail="Data does not contain the values to compute the average!"
+        )
+
     result2 = db.query(
         Departments.id,
         Departments.department,
