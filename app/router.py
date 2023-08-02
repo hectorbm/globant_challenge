@@ -156,26 +156,29 @@ def get_employee_quarters(db: Session = Depends(get_db)):
    
 @router.get("/departmentsHiringMoreThanAvg", response_class=HTMLResponse)
 def get_hiring_more_than_avg( db: Session = Depends(get_db)):
-    subquery = db.query(
-        Employees.department_id,
-        func.count().label("hiring_count")
-    ).select_from(Employees).join(
-        Departments, Departments.id == Employees.department_id
-    ).filter(
-        extract("year", cast(Employees.datetime, TIMESTAMP)) == 2021
-    ).group_by(
-        Employees.department_id
-    ).subquery()
+    subquery = get_subquery_avg_hiring_per_department_only2021(db)
 
-    avg_value = db.query(func.avg(subquery.c.hiring_count)).all()[0][0]
+    # Get the average of all departments 2021
+    avg_value = db.query(
+        func.avg(subquery.c.hiring_count)
+    ).all()[0][0]
 
-
+    # Check if the average exist
     if avg_value is None:
         raise HTTPException(
             400,
             detail="Data does not contain the values to compute the average!"
         )
 
+    result2 = get_sql_results_hiring_more_than_avg(db, avg_value)
+
+    db.close()
+
+    table_html = generate_table_html_hiring_more_than_avg(result2)
+
+    return table_html
+
+def get_sql_results_hiring_more_than_avg(db, avg_value):
     result2 = db.query(
         Departments.id,
         Departments.department,
@@ -187,9 +190,10 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
     ).having(
         func.count() > avg_value
     ).order_by(func.count().desc()).all()
+    
+    return result2
 
-    db.close()
-
+def generate_table_html_hiring_more_than_avg(result2):
     result_list = [
         {
                 'id': department_id,
@@ -206,5 +210,18 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
         table_html += f"<tr><td>{row['id']}</td><td>{row['department']}</td><td>{row['hired']}</td></tr>\n"
 
     table_html += "</table>"
-
     return table_html
+
+def get_subquery_avg_hiring_per_department_only2021(db):
+    subquery = db.query(
+        Employees.department_id,
+        func.count().label("hiring_count")
+    ).select_from(Employees).join(
+        Departments, Departments.id == Employees.department_id
+    ).filter(
+        extract("year", cast(Employees.datetime, TIMESTAMP)) == 2021
+    ).group_by(
+        Employees.department_id
+    ).subquery()
+    
+    return subquery
