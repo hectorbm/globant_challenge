@@ -104,3 +104,10 @@ def get_subquery_avg_hiring_per_department_only2021(db):
     ).subquery()
     
     return subquery
+
+def get_avg_all_departments_hiring_subquery(db, subquery):
+    avg_value = db.query(
+        func.avg(subquery.c.hiring_count)
+    ).all()[0][0]
+    
+    return avg_value

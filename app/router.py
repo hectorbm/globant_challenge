@@ -4,7 +4,6 @@ from .upload_file_utils import *
 from .database import get_db
 from .queries import *
 from sqlalchemy.orm import Session
-from sqlalchemy import func
 from .utils import *
 import pandas as pd
 from fastapi.responses import HTMLResponse
@@ -72,9 +71,7 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
     subquery = get_subquery_avg_hiring_per_department_only2021(db)
 
     # Get the average of all departments 2021
-    avg_value = db.query(
-        func.avg(subquery.c.hiring_count)
-    ).all()[0][0]
+    avg_value = get_avg_all_departments_hiring_subquery(db, subquery)
 
     # Check if the average exist
     if avg_value is None:
@@ -83,10 +80,10 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
             detail="Data does not contain the values to compute the average!"
         )
 
-    result2 = get_sql_results_hiring_more_than_avg(db, avg_value)
+    results = get_sql_results_hiring_more_than_avg(db, avg_value)
 
     db.close()
 
-    table_html = generate_table_html_hiring_more_than_avg(result2)
+    table_html = generate_table_html_hiring_more_than_avg(results)
 
     return table_html
