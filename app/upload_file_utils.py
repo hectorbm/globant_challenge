@@ -132,6 +132,11 @@ def read_comma_separated_no_header(file: UploadFile):
             status_code=400,
             detail="Parsing error reading the CSV file, please verify the file content!"
         )
+    except pd.errors.EmptyDataError as e: 
+        raise HTTPException(
+            status_code=400,
+            detail="The file provided was empty, please verify the uploaded file!"
+        )
         
     return df
 
