@@ -36,7 +36,7 @@ def bulk_upsert_data_to_db(file_type, db, df):
         Departments.create_departments(Departments, departments, db)
 
 def get_results_sql_employees_per_quarter(db):
-    return db.query(
+    results =  db.query(
             Departments.department,
             Jobs.job,
             func.sum(
@@ -75,6 +75,10 @@ def get_results_sql_employees_per_quarter(db):
                 Departments.department, Jobs.job
             ).all()
 
+    db.close()
+
+    return results
+
 
 def get_sql_results_hiring_more_than_avg(db, avg_value):
     result2 = db.query(
@@ -88,6 +92,8 @@ def get_sql_results_hiring_more_than_avg(db, avg_value):
     ).having(
         func.count() > avg_value
     ).order_by(func.count().desc()).all()
+
+    db.close()
     
     return result2
 

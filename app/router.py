@@ -73,8 +73,6 @@ def get_employee_quarters(db: Session = Depends(get_db)):
     try:
         
         results = get_results_sql_employees_per_quarter(db)
-        
-        db.close()
 
         table_html = generate_table_html_employees_per_quarter(results)
 
@@ -104,8 +102,6 @@ def get_hiring_more_than_avg( db: Session = Depends(get_db)):
         )
 
     results = get_sql_results_hiring_more_than_avg(db, avg_value)
-
-    db.close()
 
     table_html = generate_table_html_hiring_more_than_avg(results)
 
