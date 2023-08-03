@@ -22,6 +22,9 @@ To run the application succesfully:
 2) Run the API: uvicorn app.main:app --host 127.0.0.1 --port 8000 --reload
 
 
+Dockerfile:
+Additionally, if the user wants to create a docker image and use containers. A dockerfile is provided.
+
 ### API Description
 
 The API consist of 4 endpoints:
