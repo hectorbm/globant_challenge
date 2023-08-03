@@ -53,10 +53,6 @@ def upload_document(file_type: str, file: UploadFile = File(...), db: Session = 
 
     df = df.where(pd.notna(df), None)
 
-    if file_type == 'employees':
-        df['job_id'] = df['job_id'].fillna(0).astype(int)
-        df['department_id'] = df['department_id'].fillna(0).astype(int)
-
     # Load the file content into SQL
     bulk_upsert_data_to_db(file_type, db, df)
     
