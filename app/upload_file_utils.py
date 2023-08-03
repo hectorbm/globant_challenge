@@ -1,6 +1,52 @@
 from pandas_schema import Schema, Column
 from fastapi import HTTPException, UploadFile
 import pandas as pd
+from pandas_schema.validation import CustomSeriesValidation
+import re
+
+
+def is_integer_or_float_with_decimal_zero_or_null(series):
+    try:
+        # Check if each value is an integer, a float (ending with '.0'), or null (NaN)
+        is_int_or_float_with_decimal_zero_or_null = series.apply(
+            lambda x: isinstance(x, (int, float)) and (x.is_integer() if isinstance(x, float) else True) or pd.isna(x)
+        )
+    except AttributeError:
+        # If any value cannot be checked, return False
+        return pd.Series(False, index=series.index)
+    return is_int_or_float_with_decimal_zero_or_null
+
+def is_integer_or_float_with_decimal_zero(series):
+    try:
+        # Check if each value is an integer or a float (ending with '.0')
+        is_int_or_float_with_decimal_zero = series.apply(
+            lambda x: isinstance(x, (int, float)) and (x.is_integer() if isinstance(x, float) else True)
+        )
+    except AttributeError:
+        # If any value cannot be checked, return False
+        return pd.Series(False, index=series.index)
+    return is_int_or_float_with_decimal_zero
+
+def is_iso_timestamp(series):
+    try:
+        # Regular expression pattern for ISO format timestamp
+        iso_pattern = r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$'
+
+        # Check if each value matches the ISO format pattern, or if it's a non-string value (including None and NaN)
+        is_iso_timestamp = series.apply(lambda x: pd.isna(x) or (isinstance(x, str) and bool(re.match(iso_pattern, x))))
+    except AttributeError:
+        # If any value cannot be checked, return False
+        return pd.Series(False, index=series.index)
+    return is_iso_timestamp
+
+def is_string(series):
+    try:
+        # Check if each value matches the ISO format pattern, or if it's a non-string value (including None and NaN)
+        is_string = series.apply(lambda x: pd.isna(x) or isinstance(x, str))
+    except AttributeError:
+        # If any value cannot be checked, return False
+        return pd.Series(False, index=series.index)
+    return is_string
 
 
 def is_allowed_file(file_type) -> bool:
@@ -23,13 +69,12 @@ def get_employees_schema() -> Schema:
     Schema with the expected columns for the file employees
     """
     return Schema([
-        Column('id'),
-        Column('name'),
-        Column('datetime'),
-        Column('department_id'),
-        Column('job_id')
+        Column('id', [CustomSeriesValidation(is_integer_or_float_with_decimal_zero, 'Column should contain only integers.')]),
+        Column('name', [CustomSeriesValidation(is_string, 'Column should contain only strings.')]),
+        Column('datetime', [CustomSeriesValidation(is_iso_timestamp, 'Column should contain ISO Timestamps.')]),
+        Column('department_id', [CustomSeriesValidation(is_integer_or_float_with_decimal_zero_or_null, 'Column should contain only integers.')]),
+        Column('job_id', [CustomSeriesValidation(is_integer_or_float_with_decimal_zero_or_null, 'Column should contain only integers.')])
     ])
-
 
 def get_departments_schema() -> Schema:
     """
@@ -37,8 +82,8 @@ def get_departments_schema() -> Schema:
     Schema with the expected columns for the file departments
     """
     return Schema([
-        Column('id'),
-        Column('department')
+        Column('id', [CustomSeriesValidation(is_integer_or_float_with_decimal_zero, 'Column should contain only integers.')]),
+        Column('department', [CustomSeriesValidation(is_string, 'Column should contain only strings.')])
     ])
 
 def get_jobs_schema() -> Schema:
@@ -47,8 +92,8 @@ def get_jobs_schema() -> Schema:
     Schema with the expected columns for the file jobs
     """
     return Schema([
-        Column('id'),
-        Column('job')
+        Column('id', [CustomSeriesValidation(is_integer_or_float_with_decimal_zero, 'Column should contain only integers.')]),
+        Column('job', [CustomSeriesValidation(is_string, 'Column should contain only strings.')])
     ])
 
 def get_file_schema(file_type) -> Schema:
@@ -109,7 +154,11 @@ def validate_file_content(schema: Schema, df: pd.DataFrame):
     """
     errors = schema.validate(df)
     if len(errors) > 0:
-        errors = [error.message for error in errors]
+        errors = [{
+            "row": error.row, 
+            "column": error.column, 
+            "message": error.message
+        } for error in errors]
         
         raise HTTPException(
             status_code=400,
