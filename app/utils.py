@@ -1,11 +1,16 @@
-def generate_table_html_hiring_more_than_avg(result2):
+def generate_table_html_hiring_more_than_avg(results: dict):
+    """
+    Create the response table for the departments hiring more than the 2021 average.
+    Params:
+    results (dict): Dictionary containing the rows content of the response table
+    """
     result_list = [
         {
                 'id': department_id,
                 'department': department,
                 'hired': hired
             }
-            for department_id, department, hired in result2
+            for department_id, department, hired in results
         ]
 
     # Generate the HTML table
@@ -18,6 +23,11 @@ def generate_table_html_hiring_more_than_avg(result2):
     return table_html
 
 def generate_table_html_employees_per_quarter(results):
+    """
+    Create the response table for the employees hired per quarter in 2021
+    Params:
+    results (dict): Dictionary containing the rows content of the response table
+    """
     result_list = [
         {
                 'job': job_title,
