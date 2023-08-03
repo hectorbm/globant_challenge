@@ -10,22 +10,22 @@ def bulk_upsert_data_to_db(file_type: str, db: Session, df: pd.DataFrame):
 
     for idx, row in df.iterrows():
         if file_type == 'jobs':
-            jobs.append({'id': row['id'], 'job': row['job']})
+            jobs.append({'id': int(row['id']), 'job': row['job']})
             
         elif file_type == 'employees':
             employees.append(
                 {
-                "id": row['id'], 
+                "id": int(row['id']), 
                 "name": row['name'], 
                 "datetime": row['datetime'],
-                "department_id": row['department_id'] if row['department_id'] > 0 else None, 
-                "job_id": row['job_id'] if row['job_id'] > 0 else None
+                "department_id": int(row['department_id']) if not pd.isna(row['department_id']) else None, 
+                "job_id": int(row['job_id']) if not pd.isna(row['job_id']) else None
                 }
             )
 
         else:
             departments.append(
-                {'id': row['id'], 'department': row['department']}
+                {'id': int(row['id']), 'department': row['department']}
             )
 
 
