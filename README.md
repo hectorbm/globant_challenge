@@ -2,6 +2,20 @@
 
 This API provides endpoints for uploading documents, retrieving employee hiring data, and fetching department hiring statistics.
 
+To execute the application, docker must be installed. After cloning the repository, please execute:
+
+Initialize the application:
+
+```bash
+docker compose up -d
+```
+
+Stop the application:
+
+```bash
+docker compose down
+```
+
 ## Endpoints
 
 ### 1. Root Endpoint
