@@ -4,15 +4,18 @@ from sqlalchemy.orm import sessionmaker
 import os
 
 # DB Configuration
-DB_HOST = "localhost"
-DB_NAME = "postgres"
-DB_USER = os.environ.get('POSTGRES_USER')  # The DB username read from an environment variable
-DB_PASSWORD = os.environ.get('POSTGRES_PWD')  # The DB password read from an environment variable
-DB_PORT = "5432"
+
+# DB_HOST = "localhost"
+# DB_NAME = "postgres"
+# DB_USER = os.environ.get('POSTGRES_USER')  # The DB username read from an environment variable
+# DB_PASSWORD = os.environ.get('POSTGRES_PWD')  # The DB password read from an environment variable
+# DB_PORT = "5432"
 
 # Define the connection URL using the environment variables
-SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+#SQLALCHEMY_DATABASE_URL = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 
+
+SQLALCHEMY_DATABASE_URL = os.environ.get('DATABASE_URL') 
 # Create a database engine with the defined connection URL
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
